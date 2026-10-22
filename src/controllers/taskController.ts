@@ -45,7 +45,8 @@ export const updateTask = async (req: Request, res: Response) => {
   const currentTask = res.locals.task;
 
   const updatedTitle = title !== undefined ? title : currentTask.title;
-  const updatedDescription = description !== undefined ? description : currentTask.description;
+  const updatedDescription =
+    description !== undefined ? description : currentTask.description;
 
   try {
     const query = `
@@ -54,11 +55,15 @@ export const updateTask = async (req: Request, res: Response) => {
       WHERE id = $3
       RETURNING *;
     `;
-    const result = await pool.query(query, [updatedTitle, updatedDescription, id]);
+    const result = await pool.query(query, [
+      updatedTitle,
+      updatedDescription,
+      id,
+    ]);
     return res.status(200).json(result.rows[0]);
   } catch (error) {
-    console.error('Error updating task:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error("Error updating task:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -66,10 +71,31 @@ export const deleteTask = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
-    await pool.query('DELETE FROM tasks WHERE id = $1', [id]);
+    await pool.query("DELETE FROM tasks WHERE id = $1", [id]);
     return res.status(204).send();
   } catch (error) {
-    console.error('Error deleting task:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error("Error deleting task:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const toggleTaskComplete = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const currentTask = res.locals.task;
+
+  const newCompletedAt = currentTask.completed_at ? null : new Date();
+
+  try {
+    const query = `
+      UPDATE tasks
+      SET completed_at = $1, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $2
+      RETURNING *;
+    `;
+    const result = await pool.query(query, [newCompletedAt, id]);
+    return res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error("Error toggling task status:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };

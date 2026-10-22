@@ -3,6 +3,7 @@ import {
   createTask,
   deleteTask,
   getTasks,
+  toggleTaskComplete,
   updateTask,
 } from "../controllers/taskController.js";
 import {
@@ -22,5 +23,6 @@ router.put(
   updateTask,
 );
 router.delete("/tasks/:id", validateTaskExists, deleteTask);
+router.patch("/tasks/:id/complete", validateTaskExists, toggleTaskComplete);
 
 export default router;
