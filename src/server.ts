@@ -1,5 +1,7 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
+import { initDatabase } from "./config/database.js";
+import taskRoutes from './routes/taskRoutes.js';
 
 dotenv.config();
 
@@ -12,6 +14,9 @@ app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({ status: "Server is running perfectly! " });
 });
 
-app.listen(port, () => {
+app.use(taskRoutes)
+
+app.listen(port, async () => {
+  await initDatabase();
   console.log(`Server is running on http://localhost:${port}`);
 });
